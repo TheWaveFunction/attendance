@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Attendance Portal (Cloud Sync)</title>
+  
+  <!-- PDF Generator Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --present: #16a34a;
+      --absent: #dc2626;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 14px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* Lock Screen Modal */
+    #lockScreen {
+      position: fixed;
+      inset: 0;
+      background: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+
+    .lock-box {
+      background: #ffffff;
+      padding: 28px 20px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .lock-box h2 {
+      font-size: 1.25rem;
+      margin-bottom: 6px;
+    }
+
+    .lock-box p {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+
+    .pin-input {
+      letter-spacing: 8px;
+      font-size: 1.4rem;
+      text-align: center;
+      font-weight: bold;
+      padding: 10px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .pin-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 14px;
+      text-decoration: underline;
+    }
+
+    /* Main Interface */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    header h1 {
+      font-size: 1.3rem;
+    }
+
+    .btn-lock {
+      background: #fee2e2;
+      color: var(--absent);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      background: #fff;
+    }
+
+    .add-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .stats .p-val { color: var(--present); }
+    .stats .a-val { color: var(--absent); }
+
+    .quick-bar {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn:active {
+      opacity: 0.8;
+    }
+
+    .btn-outline {
+      flex: 1;
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-pdf {
+      background: var(--primary);
+      color: white;
+      font-size: 0.95rem;
+      padding: 12px;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    /* Student Tap Card */
+    .student-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .student-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background: #ffffff;
+      user-select: none;
+    }
+
+    .student-item.is-present {
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .roll-tag {
+      font-weight: 800;
+      color: #64748b;
+      font-size: 0.95rem;
+      min-width: 40px;
+    }
+
+    .student-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 6px 12px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+
+    .status-badge.present {
+      background: #22c55e;
+      color: #ffffff;
+    }
+
+    .status-badge.absent {
+      background: #e2e8f0;
+      color: #64748b;
+    }
+
+    .btn-del {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 4px 6px;
+    }
+
+    .btn-del:hover {
+      color: var(--absent);
+    }
+
+    details {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    summary {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    .sync-status {
+      font-size: 0.75rem;
+      color: #16a34a;
+      display: inline-block;
+      margin-left: 6px;
+      font-weight: normal;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Security Screen -->
+  <div id="lockScreen">
+    <div class="lock-box" id="loginBox">
+      <h2>🔒 Faculty Authorization</h2>
+      <p>Enter 4-Digit Security PIN</p>
+      <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" />
+      <button class="btn btn-pdf" style="margin-top:0;" onclick="verifyPin()">Unlock Register</button>
+      <p id="pinError" style="color:var(--absent); font-size:0.8rem; margin-top:8px; display:none;">Incorrect PIN!</p>
+      <button class="link-btn" onclick="showForgotBox()">Forgot PIN?</button>
+    </div>
+
+    <div class="lock-box" id="forgotBox" style="display: none;">
+      <h2>🔑 Reset PIN</h2>
+      <p>Security Question:<br><strong>"What is your College Secret Key?"</strong></p>
+      <input type="text" id="secAnswer" placeholder="Enter Secret Answer" style="margin-bottom:8px;" />
+      <input type="password" id="newPinInput" maxlength="4" placeholder="Set New 4-Digit PIN" style="margin-bottom:12px;" />
+      <button class="btn btn-pdf" style="margin-top:0;" onclick="resetPin()">Update & Unlock</button>
+      <p id="resetError" style="color:var(--absent); font-size:0.8rem; margin-top:8px; display:none;">Wrong secret answer!</p>
+      <button class="link-btn" onclick="showLoginBox()">Back to Login</button>
+    </div>
+  </div>
+
+  <!-- Attendance Register Container -->
+  <div class="container" id="mainPortal" style="display: none;">
+    <header>
+      <div>
+        <h1>Attendance Portal <span class="sync-status">● Live Cloud</span></h1>
+        <p style="font-size: 0.8rem; color: #64748b;">Tap name to mark present</p>
+      </div>
+      <button class="btn-lock" onclick="lockPortal()">🔒 Lock</button>
+    </header>
+
+    <!-- Session Details -->
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <label>Subject</label>
+          <input type="text" id="subject" value="Physics" />
+        </div>
+        <div>
+          <label>Semester</label>
+          <select id="semester">
+            <option value="Semester 1">Semester 1</option>
+            <option value="Semester 2">Semester 2</option>
+            <option value="Semester 3">Semester 3</option>
+            <option value="Semester 4" selected>Semester 4</option>
+            <option value="Semester 5">Semester 5</option>
+            <option value="Semester 6">Semester 6</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 10px;">
+        <div>
+          <label>Date</label>
+          <input type="date" id="date" />
+        </div>
+        <div>
+          <label>Faculty Name</label>
+          <input type="text" id="faculty" placeholder="e.g. Dr. Sharma" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Cloud Add Student -->
+    <details>
+      <summary>➕ Add New Student to Cloud Register</summary>
+      <div class="add-bar">
+        <input type="text" id="newRoll" placeholder="Roll (e.g. 05)" style="max-width: 90px;" />
+        <input type="text" id="newName" placeholder="Student Full Name" />
+        <button class="btn btn-primary" onclick="addNewStudent()">Add to Cloud</button>
+      </div>
+    </details>
+
+    <!-- Toolbar & Stats -->
+    <div class="card">
+      <div class="stats">
+        <span>Total: <span id="totalCount">0</span></span>
+        <span class="p-val">Present: <span id="presentCount">0</span></span>
+        <span class="a-val">Absent: <span id="absentCount">0</span></span>
+      </div>
+
+      <div class="quick-bar">
+        <button class="btn btn-outline" onclick="resetAllAbsent()">🔄 Reset Today (All Absent)</button>
+        <button class="btn btn-outline" onclick="markAllPresent()">✅ Mark All Present</button>
+      </div>
+
+      <button class="btn btn-pdf" onclick="generatePDF()">📥 Download Attendance PDF</button>
+    </div>
+
+    <!-- Live Cloud Student List -->
+    <div class="student-list" id="studentListContainer">
+      <div style="text-align:center; padding: 20px; color:#64748b;">Connecting to Cloud Database...</div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // 1. FIREBASE CONFIGURATION (Yahan apni Firebase keys paste karo)
+    // =========================================================
+    const firebaseConfig = {apiKey: "AIzaSyB5_ryiAbPhlPBbIOxIpLaW4srd4WwIOV4",
+  authDomain: "college-attendance-4d566.firebaseapp.com",
+  projectId: "college-attendance-4d566",
+  storageBucket: "college-attendance-4d566.firebasestorage.app",
+  messagingSenderId: "838810968081",
+  appId: "1:838810968081:web:1600b06bf0e2075ef851b0",
+  measurementId: "G-RD43P60JPE"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Starter Students List (Cloud me first time automatically load ho jayegi)
+    const INITIAL_STUDENTS = [
+      { roll: "08", name: "Aladi Hansda" },
+      { roll: "11", name: "Anuj Basa" },
+      { roll: "15", name: "Sanjukta Bhakat" },
+      { roll: "16", name: "Jayanti Hembram" },
+      { roll: "17", name: "Puja Dutta" },
+      { roll: "19", name: "Sagen Mandi" },
+      { roll: "25", name: "Madhumita Giri" },
+      { roll: "31", name: "Purva Rani Mahato" },
+      { roll: "41", name: "Subash Murmu" },
+      { roll: "42", name: "Dipali Murmu" },
+      { roll: "50", name: "Meenakshi Pradhan" },
+      { roll: "51", name: "Lilima Ahir" },
+      { roll: "53", name: "Shankar Ravi Das" },
+      { roll: "57", name: "Dipti Mahato" },
+      { roll: "59", name: "Vijay Murmu" },
+      { roll: "62", name: "Rawan Hembram" },
+      { roll: "65", name: "Suresh Sardar" },
+      { roll: "71", name: "Ronit Samant" },
+      { roll: "73", name: "Gobinda Das Jana" }
+    ];
+
+    let students = [];
+    let dailyAttendance = {};
+
+    // =========================================================
+    // 2. SECURITY (PIN: 1234, Answer: college123)
+    // =========================================================
+    const DEFAULT_PIN = "1234";
+    const SECRET_KEY = "college123";
+
+    function getPin() {
+      return localStorage.getItem("portal_saved_pin") || DEFAULT_PIN;
+    }
+
+    function verifyPin() {
+      const pin = document.getElementById("pinInput").value;
+      if (pin === getPin()) {
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("mainPortal").style.display = "block";
+        document.getElementById("pinError").style.display = "none";
+        document.getElementById("pinInput").value = "";
+      } else {
+        document.getElementById("pinError").style.display = "block";
+      }
+    }
+
+    function lockPortal() {
+      document.getElementById("lockScreen").style.display = "flex";
+      document.getElementById("mainPortal").style.display = "none";
+      showLoginBox();
+    }
+
+    function showForgotBox() {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("forgotBox").style.display = "block";
+    }
+
+    function showLoginBox() {
+      document.getElementById("forgotBox").style.display = "none";
+      document.getElementById("loginBox").style.display = "block";
+    }
+
+    function resetPin() {
+      const ans = document.getElementById("secAnswer").value.trim().toLowerCase();
+      const newPin = document.getElementById("newPinInput").value.trim();
+
+      if (ans === SECRET_KEY.toLowerCase() && newPin.length === 4) {
+        localStorage.setItem("portal_saved_pin", newPin);
+        alert("PIN Reset Successful!");
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("mainPortal").style.display = "block";
+      } else {
+        document.getElementById("resetError").style.display = "block";
+      }
+    }
+
+    // =========================================================
+    // 3. REALTIME CLOUD SYNC
+    // =========================================================
+    document.getElementById("date").valueAsDate = new Date();
+
+    // Auto-seed initial 19 students if Firestore is empty
+    async function checkAndSeedInitialData() {
+      const snapshot = await db.collection("students").get();
+      if (snapshot.empty) {
+        const batch = db.batch();
+        INITIAL_STUDENTS.forEach(student => {
+          const ref = db.collection("students").doc(student.roll);
+          batch.set(ref, { roll: student.roll, name: student.name });
+        });
+        await batch.commit();
+      }
+    }
+    checkAndSeedInitialData();
+
+    // Live Snapshot Listener
+    db.collection("students").onSnapshot((snapshot) => {
+      students = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        students.push({ id: doc.id, roll: data.roll, name: data.name });
+        if (dailyAttendance[data.roll] === undefined) {
+          dailyAttendance[data.roll] = false;
+        }
+      });
+
+      renderPortal();
+    }, (error) => {
+      console.error("Cloud DB Error: ", error);
+      document.getElementById("studentListContainer").innerHTML = 
+        `<div style="color:red; text-align:center; padding:20px;">Database Error! Check Firebase keys and test mode rules.</div>`;
+    });
+
+    function renderPortal() {
+      const container = document.getElementById("studentListContainer");
+      container.innerHTML = "";
+
+      // Sort numerically by roll
+      students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+      if (students.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b;">No students in register. Add new students above.</div>`;
+        return;
+      }
+
+      students.forEach((student) => {
+        const isPresent = !!dailyAttendance[student.roll];
+
+        const item = document.createElement("div");
+        item.className = `student-item ${isPresent ? 'is-present' : ''}`;
+
+        item.innerHTML = `
+          <div class="student-info" onclick="toggleAttendance('${student.roll}')">
+            <span class="roll-tag">#${student.roll}</span>
+            <span class="student-name">${student.name}</span>
+          </div>
+          <div class="item-actions">
+            <span class="status-badge ${isPresent ? 'present' : 'absent'}" onclick="toggleAttendance('${student.roll}')">
+              ${isPresent ? '✓ PRESENT' : 'ABSENT'}
+            </span>
+            <button class="btn-del" title="Delete Student" onclick="deleteStudent('${student.id}', '${student.name}')">✕</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      updateStats();
+    }
+
+    function toggleAttendance(roll) {
+      dailyAttendance[roll] = !dailyAttendance[roll];
+      renderPortal();
+    }
+
+    function resetAllAbsent() {
+      students.forEach(s => dailyAttendance[s.roll] = false);
+      renderPortal();
+    }
+
+    function markAllPresent() {
+      students.forEach(s => dailyAttendance[s.roll] = true);
+      renderPortal();
+    }
+
+    async function addNewStudent() {
+      const roll = document.getElementById("newRoll").value.trim();
+      const name = document.getElementById("newName").value.trim();
+
+      if (!roll || !name) {
+        alert("Please enter Roll Number and Full Name.");
+        return;
+      }
+
+      try {
+        await db.collection("students").doc(roll).set({
+          roll: roll,
+          name: name
+        });
+
+        dailyAttendance[roll] = false;
+        document.getElementById("newRoll").value = "";
+        document.getElementById("newName").value = "";
+      } catch (err) {
+        alert("Cloud Error: " + err.message);
+      }
+    }
+
+    async function deleteStudent(docId, name) {
+      if (confirm(`Remove ${name} permanently from Cloud Register?`)) {
+        try {
+          await db.collection("students").doc(docId).delete();
+          delete dailyAttendance[docId];
+        } catch (err) {
+          alert("Delete Error: " + err.message);
+        }
+      }
+    }
+
+    function updateStats() {
+      const total = students.length;
+      const present = Object.values(dailyAttendance).filter(Boolean).length;
+      const absent = total - present;
+
+      document.getElementById("totalCount").innerText = total;
+      document.getElementById("presentCount").innerText = present;
+      document.getElementById("absentCount").innerText = absent;
+    }
+
+    // =========================================================
+    // 4. INSTANT PDF GENERATOR
+    // =========================================================
+    function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const subject = document.getElementById("subject").value || "N/A";
+      const semester = document.getElementById("semester").value;
+      const date = document.getElementById("date").value || new Date().toISOString().slice(0, 10);
+      const faculty = document.getElementById("faculty").value || "N/A";
+
+      const total = students.length;
+      const present = Object.values(dailyAttendance).filter(Boolean).length;
+      const absent = total - present;
+
+      doc.setFontSize(18);
+      doc.setTextColor(37, 99, 235);
+      doc.text("Daily Attendance Register", 14, 20);
+
+      doc.setFontSize(10);
+      doc.setTextColor(70, 70, 70);
+      doc.text(`Subject: ${subject}`, 14, 30);
+      doc.text(`Semester: ${semester}`, 14, 36);
+      doc.text(`Faculty: ${faculty}`, 120, 30);
+      doc.text(`Date: ${date}`, 120, 36);
+
+      doc.setDrawColor(220, 220, 220);
+      doc.setFillColor(245, 247, 250);
+      doc.roundedRect(14, 42, 182, 12, 2, 2, 'FD');
+      doc.setFontSize(10);
+      doc.setTextColor(20, 20, 20);
+      doc.text(`Total Students: ${total}   |   Present: ${present}   |   Absent: ${absent}`, 18, 50);
+
+      const tableData = students.map((s, idx) => [
+        idx + 1,
+        s.roll,
+        s.name,
+        dailyAttendance[s.roll] ? "PRESENT" : "ABSENT"
+      ]);
+
+      doc.autoTable({
+        startY: 60,
+        head: [['S.No', 'Roll No', 'Student Name', 'Status']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255] },
+        styles: { fontSize: 10, cellPadding: 4 },
+        columnStyles: {
+          0: { cellWidth: 16 },
+          1: { cellWidth: 26 },
+          3: { cellWidth: 32, fontStyle: 'bold' }
+        },
+        didParseCell: function (data) {
+          if (data.column.index === 3) {
+            if (data.cell.raw === "PRESENT") {
+              data.cell.styles.textColor = [22, 163, 74];
+            } else {
+              data.cell.styles.textColor = [220, 38, 38];
+            }
+          }
+        }
+      });
+
+      doc.save(`Attendance_${semester}_${date}.pdf`);
+    }
+  </script>
+</body>
+</html>
