@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Attendance Portal & Final Reports</title>
-  
+  <title>Smart Attendance Portal</title>
+
   <!-- PDF Generator Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -42,7 +42,7 @@
       margin: 0 auto;
     }
 
-    /* Lock Screen Modal */
+    /* Lock Screen */
     #lockScreen {
       position: fixed;
       inset: 0;
@@ -64,17 +64,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
 
-    .lock-box h2 {
-      font-size: 1.25rem;
-      margin-bottom: 6px;
-    }
-
-    .lock-box p {
-      font-size: 0.82rem;
-      color: #64748b;
-      margin-bottom: 16px;
-    }
-
     .pin-input {
       letter-spacing: 8px;
       font-size: 1.4rem;
@@ -84,7 +73,7 @@
       border: 2px solid var(--border);
       border-radius: 8px;
       width: 100%;
-      margin-bottom: 12px;
+      margin: 12px 0;
     }
 
     .pin-input:focus {
@@ -92,18 +81,7 @@
       border-color: var(--primary);
     }
 
-    .link-btn {
-      background: none;
-      border: none;
-      color: var(--primary);
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 14px;
-      text-decoration: underline;
-    }
-
-    /* Main Interface */
+    /* Main UI */
     header {
       display: flex;
       justify-content: space-between;
@@ -113,41 +91,6 @@
 
     header h1 {
       font-size: 1.3rem;
-    }
-
-    .btn-lock {
-      background: #fee2e2;
-      color: var(--absent);
-      padding: 6px 12px;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    /* Tabs */
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      background: #e2e8f0;
-      color: #475569;
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
-
-    .tab-btn.active {
-      background: var(--primary);
-      color: white;
     }
 
     .card {
@@ -183,10 +126,27 @@
       background: #fff;
     }
 
-    .add-bar {
+    .tabs {
       display: flex;
       gap: 8px;
-      margin-top: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: #e2e8f0;
+      color: #475569;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
     }
 
     .stats {
@@ -200,14 +160,6 @@
       margin-bottom: 10px;
     }
 
-    .stats .p-val { color: var(--present); }
-    .stats .a-val { color: var(--absent); }
-
-    .quick-bar {
-      display: flex;
-      gap: 8px;
-    }
-
     .btn {
       padding: 10px;
       border: none;
@@ -215,61 +167,15 @@
       font-weight: 600;
       font-size: 0.85rem;
       cursor: pointer;
-      transition: opacity 0.15s;
     }
 
-    .btn:active {
-      opacity: 0.8;
-    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-outline { background: #f1f5f9; color: #334155; flex: 1; }
+    .btn-save { background: #16a34a; color: white; width: 100%; padding: 12px; font-size: 0.95rem; margin-top: 10px; }
+    .btn-pdf { background: #0284c7; color: white; width: 100%; margin-top: 8px; }
+    .btn-danger { background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
 
-    .btn-outline {
-      flex: 1;
-      background: #f1f5f9;
-      color: #334155;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-save {
-      background: #16a34a;
-      color: white;
-      font-size: 0.95rem;
-      padding: 12px;
-      margin-top: 10px;
-      width: 100%;
-    }
-
-    .btn-pdf {
-      background: #0284c7;
-      color: white;
-      font-size: 0.9rem;
-      padding: 10px;
-      margin-top: 8px;
-      width: 100%;
-    }
-
-    .btn-danger {
-      background: #dc2626;
-      color: white;
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    /* Student Tap Card */
-    .student-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
+    /* Student List */
     .student-item {
       display: flex;
       align-items: center;
@@ -278,6 +184,7 @@
       border-radius: 10px;
       border: 2px solid var(--border);
       background: #ffffff;
+      margin-bottom: 8px;
       user-select: none;
     }
 
@@ -286,86 +193,16 @@
       background: #f0fdf4;
     }
 
-    .student-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-      cursor: pointer;
-    }
-
-    .roll-tag {
-      font-weight: 800;
-      color: #64748b;
-      font-size: 0.95rem;
-      min-width: 40px;
-    }
-
-    .student-name {
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .item-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
     .status-badge {
       font-size: 0.75rem;
       font-weight: 800;
       padding: 6px 12px;
       border-radius: 6px;
-      letter-spacing: 0.5px;
       cursor: pointer;
     }
 
-    .status-badge.present {
-      background: #22c55e;
-      color: #ffffff;
-    }
-
-    .status-badge.absent {
-      background: #e2e8f0;
-      color: #64748b;
-    }
-
-    .btn-del {
-      background: none;
-      border: none;
-      color: #94a3b8;
-      font-size: 1rem;
-      cursor: pointer;
-      padding: 4px 6px;
-    }
-
-    .btn-del:hover {
-      color: var(--absent);
-    }
-
-    details {
-      background: #fff;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    summary {
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: var(--primary);
-      cursor: pointer;
-    }
-
-    .sync-status {
-      font-size: 0.75rem;
-      color: #16a34a;
-      display: inline-block;
-      margin-left: 6px;
-      font-weight: normal;
-    }
+    .status-badge.present { background: #22c55e; color: #ffffff; }
+    .status-badge.absent { background: #e2e8f0; color: #64748b; }
 
     /* Report Table */
     .report-table {
@@ -386,28 +223,15 @@
       color: #334155;
     }
 
-    .pct-bar-bg {
-      background: #e2e8f0;
-      border-radius: 4px;
-      height: 6px;
-      overflow: hidden;
-      margin-top: 4px;
-    }
-
-    .pct-bar-fill {
-      height: 100%;
-      background: var(--present);
-    }
-
-    /* History Management Item */
-    .history-item {
+    /* History Record Item */
+    .history-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-top: 6px;
       background: #fafafa;
     }
   </style>
@@ -416,46 +240,33 @@
 
   <!-- Security Screen -->
   <div id="lockScreen">
-    <div class="lock-box" id="loginBox">
+    <div class="lock-box">
       <h2>🔒 Faculty Authorization</h2>
-      <p>Enter 4-Digit Security PIN</p>
+      <p style="font-size:0.82rem; color:#64748b;">Enter PIN (Default: 1234)</p>
       <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" />
-      <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="verifyPin()">Unlock Register</button>
+      <button class="btn btn-primary" style="width:100%;" onclick="verifyPin()">Unlock Register</button>
       <p id="pinError" style="color:var(--absent); font-size:0.8rem; margin-top:8px; display:none;">Incorrect PIN!</p>
-      <button class="link-btn" onclick="showForgotBox()">Forgot PIN?</button>
-    </div>
-
-    <div class="lock-box" id="forgotBox" style="display: none;">
-      <h2>🔑 Reset PIN</h2>
-      <p>Security Question:<br><strong>"What is your College Secret Key?"</strong></p>
-      <input type="text" id="secAnswer" placeholder="Enter Secret Answer" style="margin-bottom:8px;" />
-      <input type="password" id="newPinInput" maxlength="4" placeholder="Set New 4-Digit PIN" style="margin-bottom:12px;" />
-      <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="resetPin()">Update & Unlock</button>
-      <p id="resetError" style="color:var(--absent); font-size:0.8rem; margin-top:8px; display:none;">Wrong secret answer!</p>
-      <button class="link-btn" onclick="showLoginBox()">Back to Login</button>
     </div>
   </div>
 
-  <!-- Attendance Register Container -->
   <div class="container" id="mainPortal" style="display: none;">
     <header>
       <div>
-        <h1>Smart Register <span class="sync-status">● Cloud Active</span></h1>
-        <p style="font-size: 0.8rem; color: #64748b;">Daily Recording & Cumulative Report</p>
+        <h1>Attendance Portal</h1>
+        <p style="font-size:0.8rem; color:#16a34a;">● Live Firebase Connected</p>
       </div>
-      <button class="btn-lock" onclick="lockPortal()">🔒 Lock</button>
+      <button class="btn" style="background:#fee2e2; color:var(--absent);" onclick="lockPortal()">🔒 Lock</button>
     </header>
 
     <!-- Navigation Tabs -->
     <div class="tabs">
       <button class="tab-btn active" id="tabMarkBtn" onclick="switchTab('mark')">📝 Daily Register</button>
       <button class="tab-btn" id="tabReportBtn" onclick="switchTab('report')">📊 Final Report</button>
-      <button class="tab-btn" id="tabManageBtn" onclick="switchTab('manage')">🗄️ Cloud Manager</button>
+      <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('history')">🗑️ Manage / Delete History</button>
     </div>
 
-    <!-- ================= VIEW 1: MARK ATTENDANCE ================= -->
+    <!-- VIEW 1: DAILY ATTENDANCE -->
     <div id="viewMarkSection">
-      <!-- Session Details -->
       <div class="card">
         <div class="grid-2">
           <div>
@@ -463,7 +274,7 @@
             <input type="text" id="subject" value="Physics" />
           </div>
           <div>
-            <label>Semester (1 - 8)</label>
+            <label>Semester (1 to 8)</label>
             <select id="semester">
               <option value="Semester 1">Semester 1</option>
               <option value="Semester 2">Semester 2</option>
@@ -476,75 +287,48 @@
             </select>
           </div>
         </div>
-
         <div class="grid-2" style="margin-top: 10px;">
           <div>
             <label>Date</label>
             <input type="date" id="date" />
           </div>
           <div>
-            <label>Faculty Name</label>
-            <input type="text" id="faculty" placeholder="e.g. Dr. Sharma" />
+            <label>Faculty</label>
+            <input type="text" id="faculty" placeholder="Faculty Name" />
           </div>
         </div>
       </div>
 
-      <!-- Cloud Add Student -->
-      <details>
-        <summary>➕ Add New Student to Cloud Register</summary>
-        <div class="add-bar">
-          <input type="text" id="newRoll" placeholder="Roll" style="max-width: 90px;" />
-          <input type="text" id="newName" placeholder="Student Full Name" />
-          <button class="btn btn-primary" onclick="addNewStudent()">Add</button>
-        </div>
-      </details>
-
-      <!-- Stats & Actions -->
       <div class="card">
         <div class="stats">
           <span>Total: <span id="totalCount">0</span></span>
-          <span class="p-val">Present: <span id="presentCount">0</span></span>
-          <span class="a-val">Absent: <span id="absentCount">0</span></span>
+          <span style="color:var(--present);">Present: <span id="presentCount">0</span></span>
+          <span style="color:var(--absent);">Absent: <span id="absentCount">0</span></span>
         </div>
 
-        <div class="quick-bar">
-          <button class="btn btn-outline" onclick="resetAllAbsent()">🔄 Reset (All Absent)</button>
-          <button class="btn btn-outline" onclick="markAllPresent()">✅ Mark All Present</button>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline" onclick="resetAllAbsent()">🔄 Reset Today</button>
+          <button class="btn btn-outline" onclick="markAllPresent()">✅ All Present</button>
         </div>
 
-        <!-- Direct Cloud Storage -->
-        <button class="btn btn-save" onclick="storeDailyAttendanceInCloud()">
-          💾 Store Attendance in Cloud
-        </button>
-
-        <!-- Compact 1-Page PDF -->
-        <button class="btn btn-pdf" onclick="generateDailyPDF()">
-          📥 Download Today's 1-Page PDF
-        </button>
+        <button class="btn btn-save" onclick="saveToCloud()">💾 Store Attendance in Cloud</button>
+        <button class="btn btn-pdf" onclick="generateDailyPDF()">📥 Download 1-Page PDF</button>
       </div>
 
-      <!-- Student List -->
-      <div class="student-list" id="studentListContainer">
-        <div style="text-align:center; padding: 20px; color:#64748b;">Connecting to Cloud Database...</div>
-      </div>
+      <div id="studentListContainer"></div>
     </div>
 
-    <!-- ================= VIEW 2: FINAL REPORT ================= -->
+    <!-- VIEW 2: FINAL REPORT -->
     <div id="viewReportSection" style="display: none;">
       <div class="card">
-        <h3 style="font-size: 1rem; margin-bottom: 8px;">Cumulative Attendance Analytics</h3>
-        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
-          Calculates total classes held and each student's attendance percentage from cloud history.
-        </p>
-
-        <div class="grid-2" style="margin-bottom: 12px;">
+        <div class="grid-2" style="margin-bottom: 10px;">
           <div>
-            <label>Filter Subject</label>
-            <input type="text" id="filterSubject" value="Physics" />
+            <label>Subject</label>
+            <input type="text" id="reportSub" value="Physics" />
           </div>
           <div>
-            <label>Filter Semester</label>
-            <select id="filterSemester">
+            <label>Semester</label>
+            <select id="reportSem">
               <option value="Semester 1">Semester 1</option>
               <option value="Semester 2">Semester 2</option>
               <option value="Semester 3">Semester 3</option>
@@ -556,59 +340,45 @@
             </select>
           </div>
         </div>
-
-        <button class="btn btn-primary" style="width: 100%;" onclick="fetchFinalReport()">
-          ⚡ Calculate & Refresh Report
-        </button>
+        <button class="btn btn-primary" style="width: 100%;" onclick="loadCumulativeReport()">⚡ Calculate Report</button>
       </div>
 
-      <!-- Report Summary Card -->
-      <div class="card" id="reportSummaryCard" style="display: none;">
+      <div class="card" id="reportCard" style="display: none;">
         <div class="stats">
-          <span>Classes Held: <span id="totalClassesHeld" style="color:var(--primary);">0</span></span>
-          <span>Target Subject: <span id="reportSubjectLabel">Physics</span></span>
+          <span>Total Classes: <span id="reportClassesHeld">0</span></span>
+          <span id="reportMeta"></span>
         </div>
-
-        <div id="reportTableContainer"></div>
-
-        <button class="btn btn-pdf" style="margin-top: 14px;" onclick="downloadCumulativePDF()">
-          📥 Download Final Report PDF (1-Page Fit)
-        </button>
+        <div id="reportTableArea"></div>
       </div>
     </div>
 
-    <!-- ================= VIEW 3: CLOUD DATA MANAGER (DELETE / PURGE) ================= -->
-    <div id="viewManageSection" style="display: none;">
+    <!-- VIEW 3: DELETE CLOUD DATA (DIRECT VISIBLE) -->
+    <div id="viewHistorySection" style="display: none;">
       <div class="card">
-        <h3 style="font-size: 1rem; margin-bottom: 4px;">Saved Attendance History</h3>
-        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
-          View or delete saved records from the Cloud Database.
-        </p>
-
-        <div class="grid-2" style="margin-bottom: 10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div>
-            <label>Select Semester</label>
-            <select id="manageSemester" onchange="loadSavedSessionsList()">
-              <option value="Semester 1">Semester 1</option>
-              <option value="Semester 2">Semester 2</option>
-              <option value="Semester 3">Semester 3</option>
-              <option value="Semester 4" selected>Semester 4</option>
-              <option value="Semester 5">Semester 5</option>
-              <option value="Semester 6">Semester 6</option>
-              <option value="Semester 7">Semester 7</option>
-              <option value="Semester 8">Semester 8</option>
-            </select>
+            <h3 style="font-size:1rem;">Stored Cloud Records</h3>
+            <p style="font-size:0.75rem; color:#64748b;">Delete wrong entries or old semester data.</p>
           </div>
-          <div>
-            <label>Danger Zone</label>
-            <button class="btn-danger" style="width: 100%; height: 38px;" onclick="purgeSemesterData()">
-              ⚠️ Clear Entire Semester
-            </button>
-          </div>
+          <button class="btn-danger" onclick="wipeEntireSemester()">⚠️ Wipe Entire Semester</button>
         </div>
 
-        <div id="historyListContainer" style="margin-top: 10px;">
-          <div style="text-align:center; padding:15px; color:#64748b;">Loading saved sessions...</div>
+        <div style="margin-bottom: 12px;">
+          <label>Filter by Semester</label>
+          <select id="historySemFilter" onchange="loadSavedSessions()">
+            <option value="Semester 1">Semester 1</option>
+            <option value="Semester 2">Semester 2</option>
+            <option value="Semester 3">Semester 3</option>
+            <option value="Semester 4" selected>Semester 4</option>
+            <option value="Semester 5">Semester 5</option>
+            <option value="Semester 6">Semester 6</option>
+            <option value="Semester 7">Semester 7</option>
+            <option value="Semester 8">Semester 8</option>
+          </select>
+        </div>
+
+        <div id="savedSessionsList">
+          <div style="text-align:center; color:#64748b; padding:15px;">Loading saved data...</div>
         </div>
       </div>
     </div>
@@ -616,9 +386,7 @@
   </div>
 
   <script>
-    // =========================================================
-    // 1. FIREBASE CONFIGURATION
-    // =========================================================
+    // 1. FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyB5_ryiAbPhlPBbIOxIpLaW4srd4WwIOV4",
       authDomain: "college-attendance-4d566.firebaseapp.com",
@@ -656,26 +424,14 @@
 
     let students = [];
     let dailyAttendance = {};
-    let computedReportData = [];
-    let currentTotalClasses = 0;
 
-    // =========================================================
-    // 2. SECURITY (PIN: 1234, Secret: college123)
-    // =========================================================
-    const DEFAULT_PIN = "1234";
-    const SECRET_KEY = "college123";
-
-    function getPin() {
-      return localStorage.getItem("portal_saved_pin") || DEFAULT_PIN;
-    }
-
+    // 2. PIN AUTH
     function verifyPin() {
       const pin = document.getElementById("pinInput").value;
-      if (pin === getPin()) {
+      if (pin === "1234") {
         document.getElementById("lockScreen").style.display = "none";
         document.getElementById("mainPortal").style.display = "block";
-        document.getElementById("pinError").style.display = "none";
-        document.getElementById("pinInput").value = "";
+        document.getElementById("date").valueAsDate = new Date();
       } else {
         document.getElementById("pinError").style.display = "block";
       }
@@ -684,183 +440,83 @@
     function lockPortal() {
       document.getElementById("lockScreen").style.display = "flex";
       document.getElementById("mainPortal").style.display = "none";
-      showLoginBox();
     }
 
-    function showForgotBox() {
-      document.getElementById("loginBox").style.display = "none";
-      document.getElementById("forgotBox").style.display = "block";
+    // 3. TABS
+    function switchTab(t) {
+      document.getElementById("viewMarkSection").style.display = t === 'mark' ? 'block' : 'none';
+      document.getElementById("viewReportSection").style.display = t === 'report' ? 'block' : 'none';
+      document.getElementById("viewHistorySection").style.display = t === 'history' ? 'block' : 'none';
+
+      document.getElementById("tabMarkBtn").className = `tab-btn ${t === 'mark' ? 'active' : ''}`;
+      document.getElementById("tabReportBtn").className = `tab-btn ${t === 'report' ? 'active' : ''}`;
+      document.getElementById("tabHistoryBtn").className = `tab-btn ${t === 'history' ? 'active' : ''}`;
+
+      if (t === 'history') loadSavedSessions();
+      if (t === 'report') loadCumulativeReport();
     }
 
-    function showLoginBox() {
-      document.getElementById("forgotBox").style.display = "none";
-      document.getElementById("loginBox").style.display = "block";
-    }
-
-    function resetPin() {
-      const ans = document.getElementById("secAnswer").value.trim().toLowerCase();
-      const newPin = document.getElementById("newPinInput").value.trim();
-
-      if (ans === SECRET_KEY.toLowerCase() && newPin.length === 4) {
-        localStorage.setItem("portal_saved_pin", newPin);
-        alert("PIN Reset Successful!");
-        document.getElementById("lockScreen").style.display = "none";
-        document.getElementById("mainPortal").style.display = "block";
-      } else {
-        document.getElementById("resetError").style.display = "block";
-      }
-    }
-
-    // =========================================================
-    // 3. TABS & VIEW TOGGLE
-    // =========================================================
-    function switchTab(tab) {
-      document.getElementById("viewMarkSection").style.display = tab === 'mark' ? "block" : "none";
-      document.getElementById("viewReportSection").style.display = tab === 'report' ? "block" : "none";
-      document.getElementById("viewManageSection").style.display = tab === 'manage' ? "block" : "none";
-
-      document.getElementById("tabMarkBtn").classList.toggle("active", tab === 'mark');
-      document.getElementById("tabReportBtn").classList.toggle("active", tab === 'report');
-      document.getElementById("tabManageBtn").classList.toggle("active", tab === 'manage');
-
-      if (tab === 'report') fetchFinalReport();
-      if (tab === 'manage') loadSavedSessionsList();
-    }
-
-    // =========================================================
-    // 4. REALTIME STUDENT SYNC & ATTENDANCE UI
-    // =========================================================
-    document.getElementById("date").valueAsDate = new Date();
-
-    async function checkAndSeedInitialData() {
-      const snapshot = await db.collection("students").get();
-      if (snapshot.empty) {
+    // 4. SYNC STUDENTS
+    async function initDb() {
+      const snap = await db.collection("students").get();
+      if (snap.empty) {
         const batch = db.batch();
-        INITIAL_STUDENTS.forEach(student => {
-          const ref = db.collection("students").doc(student.roll);
-          batch.set(ref, { roll: student.roll, name: student.name });
-        });
+        INITIAL_STUDENTS.forEach(s => batch.set(db.collection("students").doc(s.roll), s));
         await batch.commit();
       }
     }
-    checkAndSeedInitialData();
+    initDb();
 
-    db.collection("students").onSnapshot((snapshot) => {
+    db.collection("students").onSnapshot(snap => {
       students = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        students.push({ id: doc.id, roll: data.roll, name: data.name });
-        if (dailyAttendance[data.roll] === undefined) {
-          dailyAttendance[data.roll] = false;
-        }
+      snap.forEach(doc => {
+        const d = doc.data();
+        students.push({ id: doc.id, roll: d.roll, name: d.name });
+        if (dailyAttendance[d.roll] === undefined) dailyAttendance[d.roll] = false;
       });
-      renderPortal();
-    }, (error) => {
-      console.error("Cloud DB Error: ", error);
-      document.getElementById("studentListContainer").innerHTML = 
-        `<div style="color:red; text-align:center; padding:20px;">Database Connection Error!</div>`;
+      renderList();
     });
 
-    function renderPortal() {
-      const container = document.getElementById("studentListContainer");
-      container.innerHTML = "";
+    function renderList() {
+      const cont = document.getElementById("studentListContainer");
+      cont.innerHTML = "";
       students.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
 
-      if (students.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:#64748b;">No students found.</div>`;
-        return;
-      }
-
-      students.forEach((student) => {
-        const isPresent = !!dailyAttendance[student.roll];
-        const item = document.createElement("div");
-        item.className = `student-item ${isPresent ? 'is-present' : ''}`;
-
-        item.innerHTML = `
-          <div class="student-info" onclick="toggleAttendance('${student.roll}')">
-            <span class="roll-tag">#${student.roll}</span>
-            <span class="student-name">${student.name}</span>
+      students.forEach(s => {
+        const isPresent = !!dailyAttendance[s.roll];
+        const div = document.createElement("div");
+        div.className = `student-item ${isPresent ? 'is-present' : ''}`;
+        div.innerHTML = `
+          <div onclick="toggleAtt('${s.roll}')" style="cursor:pointer; flex:1;">
+            <strong>#${s.roll}</strong> ${s.name}
           </div>
-          <div class="item-actions">
-            <span class="status-badge ${isPresent ? 'present' : 'absent'}" onclick="toggleAttendance('${student.roll}')">
-              ${isPresent ? '✓ PRESENT' : 'ABSENT'}
-            </span>
-            <button class="btn-del" title="Delete Student" onclick="deleteStudent('${student.id}', '${student.name}')">✕</button>
-          </div>
+          <span class="status-badge ${isPresent ? 'present' : 'absent'}" onclick="toggleAtt('${s.roll}')">
+            ${isPresent ? '✓ PRESENT' : 'ABSENT'}
+          </span>
         `;
-        container.appendChild(item);
+        cont.appendChild(div);
       });
-
       updateStats();
     }
 
-    function toggleAttendance(roll) {
-      dailyAttendance[roll] = !dailyAttendance[roll];
-      renderPortal();
-    }
-
-    function resetAllAbsent() {
-      students.forEach(s => dailyAttendance[s.roll] = false);
-      renderPortal();
-    }
-
-    function markAllPresent() {
-      students.forEach(s => dailyAttendance[s.roll] = true);
-      renderPortal();
-    }
+    function toggleAtt(r) { dailyAttendance[r] = !dailyAttendance[r]; renderList(); }
+    function resetAllAbsent() { students.forEach(s => dailyAttendance[s.roll] = false); renderList(); }
+    function markAllPresent() { students.forEach(s => dailyAttendance[s.roll] = true); renderList(); }
 
     function updateStats() {
       const total = students.length;
       const present = Object.values(dailyAttendance).filter(Boolean).length;
-      const absent = total - present;
-
       document.getElementById("totalCount").innerText = total;
       document.getElementById("presentCount").innerText = present;
-      document.getElementById("absentCount").innerText = absent;
+      document.getElementById("absentCount").innerText = total - present;
     }
 
-    async function addNewStudent() {
-      const roll = document.getElementById("newRoll").value.trim();
-      const name = document.getElementById("newName").value.trim();
-
-      if (!roll || !name) {
-        alert("Please enter Roll Number and Full Name.");
-        return;
-      }
-
-      try {
-        await db.collection("students").doc(roll).set({ roll: roll, name: name });
-        dailyAttendance[roll] = false;
-        document.getElementById("newRoll").value = "";
-        document.getElementById("newName").value = "";
-      } catch (err) {
-        alert("Cloud Error: " + err.message);
-      }
-    }
-
-    async function deleteStudent(docId, name) {
-      if (confirm(`Remove ${name} permanently from Student List?`)) {
-        try {
-          await db.collection("students").doc(docId).delete();
-          delete dailyAttendance[docId];
-        } catch (err) {
-          alert("Delete Error: " + err.message);
-        }
-      }
-    }
-
-    // =========================================================
-    // 5. CLOUD PERMANENT STORAGE
-    // =========================================================
-    async function storeDailyAttendanceInCloud() {
-      const subject = document.getElementById("subject").value.trim() || "General";
-      const semester = document.getElementById("semester").value;
-      const date = document.getElementById("date").value || new Date().toISOString().slice(0, 10);
-      const faculty = document.getElementById("faculty").value.trim() || "Faculty";
-
-      const total = students.length;
-      const present = Object.values(dailyAttendance).filter(Boolean).length;
-      const absent = total - present;
+    // 5. SAVE TO FIRESTORE
+    async function saveToCloud() {
+      const sub = document.getElementById("subject").value.trim() || "Physics";
+      const sem = document.getElementById("semester").value;
+      const dt = document.getElementById("date").value || new Date().toISOString().slice(0, 10);
+      const fac = document.getElementById("faculty").value.trim() || "Faculty";
 
       const records = students.map(s => ({
         roll: s.roll,
@@ -868,188 +524,129 @@
         status: dailyAttendance[s.roll] ? "PRESENT" : "ABSENT"
       }));
 
-      const docId = `${date}_${semester.replace(/\s+/g, '_')}_${subject.replace(/\s+/g, '_')}`;
+      const docId = `${dt}_${sem.replace(/\s+/g, '_')}_${sub.replace(/\s+/g, '_')}`;
 
       try {
         await db.collection("attendance_history").doc(docId).set({
-          date: date,
-          subject: subject,
-          semester: semester,
-          faculty: faculty,
-          totalStudents: total,
-          presentCount: present,
-          absentCount: absent,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          date: dt,
+          subject: sub,
+          semester: sem,
+          faculty: fac,
+          total: students.length,
+          present: Object.values(dailyAttendance).filter(Boolean).length,
           records: records
         });
-
-        alert(`✅ Attendance successfully saved to Cloud!\n\nSubject: ${subject}\nSemester: ${semester}\nDate: ${date}\nPresent: ${present}/${total}`);
-      } catch (err) {
-        console.error("Storage Error: ", err);
-        alert("❌ Failed to save: " + err.message);
+        alert(`✅ Attendance successfully saved to Cloud!\nDate: ${dt}\nSubject: ${sub}`);
+      } catch (e) {
+        alert("Save Error: " + e.message);
       }
     }
 
-    // =========================================================
-    // 6. CLOUD DATA MANAGER (DELETE SINGLE / BULK PURGE)
-    // =========================================================
-    async function loadSavedSessionsList() {
-      const selectedSem = document.getElementById("manageSemester").value;
-      const container = document.getElementById("historyListContainer");
-      container.innerHTML = `<div style="text-align:center; padding:15px; color:#64748b;">Loading saved sessions...</div>`;
+    // 6. DELETE & MANAGE CLOUD DATA
+    async function loadSavedSessions() {
+      const sem = document.getElementById("historySemFilter").value;
+      const cont = document.getElementById("savedSessionsList");
+      cont.innerHTML = `<div style="text-align:center; padding:15px; color:#64748b;">Loading...</div>`;
 
       try {
-        const snapshot = await db.collection("attendance_history")
-          .where("semester", "==", selectedSem)
-          .get();
-
-        if (snapshot.empty) {
-          container.innerHTML = `<div style="text-align:center; padding:15px; color:#64748b;">No records found for ${selectedSem}.</div>`;
+        const snap = await db.collection("attendance_history").where("semester", "==", sem).get();
+        if (snap.empty) {
+          cont.innerHTML = `<div style="text-align:center; padding:15px; color:#64748b;">No records found for ${sem}.</div>`;
           return;
         }
 
         let html = "";
-        snapshot.forEach(doc => {
+        snap.forEach(doc => {
           const d = doc.data();
           html += `
-            <div class="history-item">
+            <div class="history-card">
               <div>
                 <strong>📅 ${d.date}</strong> — <span>${d.subject}</span>
-                <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
-                  Present: <b style="color:var(--present);">${d.presentCount}</b> / Total: ${d.totalStudents} | Faculty: ${d.faculty || 'N/A'}
-                </div>
+                <div style="font-size:0.75rem; color:#64748b;">Present: ${d.present}/${d.total}</div>
               </div>
-              <button class="btn-danger" onclick="deleteSingleSession('${doc.id}', '${d.date}', '${d.subject}')">
+              <button class="btn-danger" onclick="deleteCloudRecord('${doc.id}', '${d.date}')">
                 🗑️ Delete
               </button>
             </div>
           `;
         });
-
-        container.innerHTML = html;
-      } catch (err) {
-        container.innerHTML = `<div style="color:red; text-align:center;">Failed to load: ${err.message}</div>`;
+        cont.innerHTML = html;
+      } catch (e) {
+        cont.innerHTML = `<div style="color:red;">Error: ${e.message}</div>`;
       }
     }
 
-    // Delete single class session
-    async function deleteSingleSession(docId, date, subject) {
-      if (confirm(`Kya aap sure hain ki "${date}" (${subject}) ka attendance record cloud se delete karna hai?`)) {
+    // Delete single class
+    async function deleteCloudRecord(docId, date) {
+      if (confirm(`Kya aap ${date} ka record cloud database se permanently delete karna chahte hain?`)) {
         try {
           await db.collection("attendance_history").doc(docId).delete();
-          alert("✅ Session record cloud se delete ho gaya!");
-          loadSavedSessionsList();
-        } catch (err) {
-          alert("❌ Delete error: " + err.message);
+          alert("✅ Deleted successfully!");
+          loadSavedSessions();
+        } catch (e) {
+          alert("Delete failed: " + e.message);
         }
       }
     }
 
-    // Purge whole semester
-    async function purgeSemesterData() {
-      const selectedSem = document.getElementById("manageSemester").value;
-      const promptPin = prompt(`⚠️ WARNING: Yeh "${selectedSem}" ka SAARA attendance data permanently delete kar dega!\n\nConfirm karne ke liye Security PIN daalein:`);
-      
-      if (promptPin === getPin()) {
+    // Wipe whole semester
+    async function wipeEntireSemester() {
+      const sem = document.getElementById("historySemFilter").value;
+      const check = prompt(`Type "DELETE" to permanently wipe all attendance for ${sem}:`);
+      if (check === "DELETE") {
         try {
-          const snapshot = await db.collection("attendance_history")
-            .where("semester", "==", selectedSem)
-            .get();
-
-          if (snapshot.empty) {
-            alert("Is semester ka koi record nahi mila.");
-            return;
-          }
-
+          const snap = await db.collection("attendance_history").where("semester", "==", sem).get();
           const batch = db.batch();
-          snapshot.forEach(doc => batch.delete(doc.ref));
+          snap.forEach(doc => batch.delete(doc.ref));
           await batch.commit();
-
-          alert(`✅ ${selectedSem} ka saara attendance data successfully delete ho gaya!`);
-          loadSavedSessionsList();
-        } catch (err) {
-          alert("❌ Purge error: " + err.message);
+          alert(`✅ All records for ${sem} have been deleted!`);
+          loadSavedSessions();
+        } catch (e) {
+          alert("Wipe error: " + e.message);
         }
-      } else if (promptPin !== null) {
-        alert("❌ Galat PIN! Operation cancel ho gaya.");
       }
     }
 
-    // =========================================================
-    // 7. CUMULATIVE FINAL REPORT ANALYTICS
-    // =========================================================
-    async function fetchFinalReport() {
-      const filterSub = document.getElementById("filterSubject").value.trim().toLowerCase();
-      const filterSem = document.getElementById("filterSemester").value;
-      const container = document.getElementById("reportTableContainer");
+    // 7. CUMULATIVE REPORT
+    async function loadCumulativeReport() {
+      const sub = document.getElementById("reportSub").value.trim().toLowerCase();
+      const sem = document.getElementById("reportSem").value;
+      const cont = document.getElementById("reportTableArea");
 
-      container.innerHTML = `<div style="text-align:center; padding:15px; color:#64748b;">Calculating records from Cloud...</div>`;
-      document.getElementById("reportSummaryCard").style.display = "block";
+      document.getElementById("reportCard").style.display = "block";
+      cont.innerHTML = `<div style="text-align:center; padding:15px;">Calculating...</div>`;
 
       try {
-        const querySnapshot = await db.collection("attendance_history")
-          .where("semester", "==", filterSem)
-          .get();
-
-        const filteredDocs = [];
-        querySnapshot.forEach(doc => {
-          const data = doc.data();
-          if (data.subject && data.subject.trim().toLowerCase() === filterSub) {
-            filteredDocs.push(data);
-          }
+        const snap = await db.collection("attendance_history").where("semester", "==", sem).get();
+        const docs = [];
+        snap.forEach(d => {
+          const val = d.data();
+          if (val.subject && val.subject.toLowerCase() === sub) docs.push(val);
         });
 
-        currentTotalClasses = filteredDocs.length;
-        document.getElementById("totalClassesHeld").innerText = currentTotalClasses;
-        document.getElementById("reportSubjectLabel").innerText = `${document.getElementById("filterSubject").value} (${filterSem})`;
+        const totalClasses = docs.length;
+        document.getElementById("reportClassesHeld").innerText = totalClasses;
+        document.getElementById("reportMeta").innerText = `${sem} - ${document.getElementById("reportSub").value}`;
 
-        if (currentTotalClasses === 0) {
-          container.innerHTML = `<div style="text-align:center; padding:15px; color:#dc2626;">No recorded classes found in Cloud for ${filterSem} - ${document.getElementById("filterSubject").value}. Pehle Daily Register se attendance cloud me store karein.</div>`;
-          computedReportData = [];
+        if (totalClasses === 0) {
+          cont.innerHTML = `<div style="color:red; text-align:center; padding:10px;">No saved classes found for this subject and semester.</div>`;
           return;
         }
 
-        const attendanceMap = {};
-        students.forEach(s => {
-          attendanceMap[s.roll] = { roll: s.roll, name: s.name, attended: 0 };
+        const map = {};
+        students.forEach(s => map[s.roll] = { roll: s.roll, name: s.name, attended: 0 });
+
+        docs.forEach(session => {
+          session.records.forEach(r => {
+            if (map[r.roll] && r.status === "PRESENT") map[r.roll].attended++;
+          });
         });
 
-        filteredDocs.forEach(session => {
-          if (Array.isArray(session.records)) {
-            session.records.forEach(r => {
-              if (attendanceMap[r.roll]) {
-                if (r.status === "PRESENT") {
-                  attendanceMap[r.roll].attended += 1;
-                }
-              } else {
-                attendanceMap[r.roll] = {
-                  roll: r.roll,
-                  name: r.name,
-                  attended: r.status === "PRESENT" ? 1 : 0
-                };
-              }
-            });
-          }
-        });
-
-        computedReportData = Object.values(attendanceMap).map(item => {
-          const pct = ((item.attended / currentTotalClasses) * 100).toFixed(1);
-          return {
-            roll: item.roll,
-            name: item.name,
-            attended: item.attended,
-            total: currentTotalClasses,
-            percentage: pct
-          };
-        });
-
-        computedReportData.sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
-
-        let tableHtml = `
+        let html = `
           <table class="report-table">
             <thead>
               <tr>
-                <th>Roll No</th>
+                <th>Roll</th>
                 <th>Student Name</th>
                 <th>Attended</th>
                 <th>Presence %</th>
@@ -1058,67 +655,43 @@
             <tbody>
         `;
 
-        computedReportData.forEach(row => {
-          const isLow = parseFloat(row.percentage) < 75;
-          tableHtml += `
+        Object.values(map).forEach(row => {
+          const pct = ((row.attended / totalClasses) * 100).toFixed(1);
+          const isLow = pct < 75;
+          html += `
             <tr>
-              <td style="font-weight:700;">#${row.roll}</td>
+              <td><strong>#${row.roll}</strong></td>
               <td>${row.name}</td>
-              <td><strong>${row.attended}</strong> / ${row.total}</td>
-              <td>
-                <span style="font-weight:700; color:${isLow ? '#dc2626' : '#16a34a'}">
-                  ${row.percentage}%
-                </span>
-                <div class="pct-bar-bg">
-                  <div class="pct-bar-fill" style="width:${row.percentage}%; background:${isLow ? '#dc2626' : '#16a34a'};"></div>
-                </div>
+              <td><strong>${row.attended}</strong> / ${totalClasses}</td>
+              <td style="font-weight:bold; color:${isLow ? '#dc2626' : '#16a34a'}">
+                ${pct}%
               </td>
             </tr>
           `;
         });
 
-        tableHtml += `</tbody></table>`;
-        container.innerHTML = tableHtml;
-
-      } catch (err) {
-        console.error("Report Fetch Error: ", err);
-        container.innerHTML = `<div style="color:red; text-align:center;">Failed to calculate report: ${err.message}</div>`;
+        html += `</tbody></table>`;
+        cont.innerHTML = html;
+      } catch (e) {
+        cont.innerHTML = `<div style="color:red;">Error: ${e.message}</div>`;
       }
     }
 
-    // =========================================================
-    // 8. 1-PAGE DAILY PDF (NO S.NO)
-    // =========================================================
+    // 8. 1-PAGE PDF (NO S.NO)
     function generateDailyPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
+      const sub = document.getElementById("subject").value || "Physics";
+      const sem = document.getElementById("semester").value;
+      const dt = document.getElementById("date").value || new Date().toISOString().slice(0, 10);
 
-      const subject = document.getElementById("subject").value || "N/A";
-      const semester = document.getElementById("semester").value;
-      const date = document.getElementById("date").value || new Date().toISOString().slice(0, 10);
-      const faculty = document.getElementById("faculty").value || "N/A";
-
-      const total = students.length;
-      const present = Object.values(dailyAttendance).filter(Boolean).length;
-      const absent = total - present;
-
-      doc.setFontSize(15);
+      doc.setFontSize(14);
       doc.setTextColor(37, 99, 235);
       doc.text("Daily Attendance Register", 14, 15);
 
       doc.setFontSize(9);
-      doc.setTextColor(60, 60, 60);
-      doc.text(`Subject: ${subject}`, 14, 22);
-      doc.text(`Semester: ${semester}`, 14, 27);
-      doc.text(`Faculty: ${faculty}`, 120, 22);
-      doc.text(`Date: ${date}`, 120, 27);
-
-      doc.setDrawColor(225, 225, 225);
-      doc.setFillColor(245, 247, 250);
-      doc.roundedRect(14, 31, 182, 8, 1.5, 1.5, 'FD');
-      doc.setFontSize(8.5);
-      doc.setTextColor(30, 30, 30);
-      doc.text(`Total: ${total}   |   Present: ${present}   |   Absent: ${absent}`, 18, 36.5);
+      doc.setTextColor(50, 50, 50);
+      doc.text(`Subject: ${sub}  |  ${sem}  |  Date: ${dt}`, 14, 22);
 
       const tableData = students.map(s => [
         s.roll,
@@ -1126,102 +699,16 @@
         dailyAttendance[s.roll] ? "PRESENT" : "ABSENT"
       ]);
 
-      const rowPadding = students.length > 25 ? 1.5 : 2.5;
-
       doc.autoTable({
-        startY: 42,
+        startY: 28,
         head: [['Roll No', 'Student Name', 'Status']],
         body: tableData,
         theme: 'striped',
-        headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 8.5, cellPadding: rowPadding },
-        columnStyles: {
-          0: { cellWidth: 35, fontStyle: 'bold' },
-          1: { cellWidth: 100 },
-          2: { cellWidth: 47, fontStyle: 'bold', halign: 'center' }
-        },
-        didParseCell: function (data) {
-          if (data.column.index === 2) {
-            if (data.cell.raw === "PRESENT") {
-              data.cell.styles.textColor = [22, 163, 74];
-            } else if (data.cell.raw === "ABSENT") {
-              data.cell.styles.textColor = [220, 38, 38];
-            }
-          }
-        }
+        styles: { fontSize: 8.5, cellPadding: 2 },
+        headStyles: { fillColor: [37, 99, 235] }
       });
 
-      doc.save(`Daily_Attendance_${semester}_${date}.pdf`);
-    }
-
-    // =========================================================
-    // 9. FINAL CUMULATIVE REPORT PDF (NO S.NO, 1-PAGE FIT)
-    // =========================================================
-    function downloadCumulativePDF() {
-      if (!computedReportData || computedReportData.length === 0) {
-        alert("Pehle Report calculate karein.");
-        return;
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'mm', 'a4');
-
-      const filterSub = document.getElementById("filterSubject").value || "N/A";
-      const filterSem = document.getElementById("filterSemester").value;
-
-      doc.setFontSize(15);
-      doc.setTextColor(37, 99, 235);
-      doc.text("Cumulative Attendance Final Report", 14, 15);
-
-      doc.setFontSize(9);
-      doc.setTextColor(60, 60, 60);
-      doc.text(`Subject: ${filterSub}`, 14, 22);
-      doc.text(`Semester: ${filterSem}`, 14, 27);
-      doc.text(`Total Classes Held: ${currentTotalClasses}`, 120, 22);
-      doc.text(`Generated On: ${new Date().toLocaleDateString()}`, 120, 27);
-
-      doc.setDrawColor(225, 225, 225);
-      doc.setFillColor(245, 247, 250);
-      doc.roundedRect(14, 31, 182, 8, 1.5, 1.5, 'FD');
-      doc.setFontSize(8.5);
-      doc.setTextColor(30, 30, 30);
-      doc.text(`Report Metric: Attendance Count and Percentage over ${currentTotalClasses} classes`, 18, 36.5);
-
-      const tableData = computedReportData.map(r => [
-        r.roll,
-        r.name,
-        `${r.attended} / ${r.total}`,
-        `${r.percentage}%`
-      ]);
-
-      const rowPadding = computedReportData.length > 25 ? 1.5 : 2.5;
-
-      doc.autoTable({
-        startY: 42,
-        head: [['Roll No', 'Student Name', 'Classes Attended', 'Presence %']],
-        body: tableData,
-        theme: 'striped',
-        headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
-        styles: { fontSize: 8.5, cellPadding: rowPadding },
-        columnStyles: {
-          0: { cellWidth: 35, fontStyle: 'bold' },
-          1: { cellWidth: 85 },
-          2: { cellWidth: 35, halign: 'center' },
-          3: { cellWidth: 27, fontStyle: 'bold', halign: 'center' }
-        },
-        didParseCell: function (data) {
-          if (data.column.index === 3) {
-            const val = parseFloat(data.cell.raw);
-            if (val < 75) {
-              data.cell.styles.textColor = [220, 38, 38];
-            } else {
-              data.cell.styles.textColor = [22, 163, 74];
-            }
-          }
-        }
-      });
-
-      doc.save(`Final_Attendance_Report_${filterSem}_${filterSub}.pdf`);
+      doc.save(`Attendance_${sem}_${dt}.pdf`);
     }
   </script>
 </body>
