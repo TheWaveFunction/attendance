@@ -448,6 +448,65 @@
       border-color: #fde68a;
     }
 
+    /* Student Roster Management */
+    .roster-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .roster-actions .btn {
+      flex: 1;
+    }
+
+    .btn-add {
+      background: var(--emerald-subtle);
+      color: var(--emerald);
+      border: 1px solid #a7f3d0;
+    }
+
+    .btn-add:hover {
+      background: #d1fae5;
+      border-color: #6ee7b7;
+    }
+
+    .student-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+    }
+
+    .btn-student-edit,
+    .btn-student-delete {
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 4px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .btn-student-edit { color: var(--amber); }
+    .btn-student-delete { color: var(--rose); }
+
+    .btn-student-edit:hover {
+      background: #fef3c7;
+      border-color: #fde68a;
+    }
+
+    .btn-student-delete:hover {
+      background: var(--rose-subtle);
+      border-color: #fecdd3;
+    }
+
+    @media (max-width: 520px) {
+      .student-actions {
+        flex-direction: column;
+      }
+    }
+
     /* Compact Roster View */
     #studentListContainer {
       border: 1px solid var(--border);
@@ -577,7 +636,6 @@
 
     <div class="lock-box" id="forgotBox" style="display: none;">
       <h2>Reset Security PIN</h2>
-      <p>Key Challenge: <strong>"College Secret Key"</strong></p>
       <input type="text" id="secAnswer" placeholder="Enter Secret Answer" style="margin-bottom:8px;" />
       <input type="password" id="newPinInput" maxlength="4" placeholder="Set New 4-Digit PIN" style="margin-bottom:12px;" />
       <button class="btn btn-primary" style="width:100%; padding:10px;" onclick="resetPin()">Commit & Unlock</button>
@@ -674,6 +732,19 @@
 
         <button id="saveBtn" class="btn btn-save" onclick="saveToCloud()">Commit to Cloud Database</button>
         <button class="btn btn-pdf" onclick="generateDailyPDF()">Export Daily Sheet (PDF)</button>
+      </div>
+
+      <!-- Student Roster Management -->
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div>
+            <h3 style="font-size:13px; font-weight:600;">Student Roster</h3>
+            <p style="font-size:11.5px; color:var(--muted);">Add, edit or remove students from the Firestore roster.</p>
+          </div>
+        </div>
+        <div class="roster-actions">
+          <button class="btn btn-add" onclick="addStudent()">+ Add Student</button>
+        </div>
       </div>
 
       <!-- Compact Student List -->
@@ -888,17 +959,145 @@
         const div = document.createElement("div");
         div.className = `student-item ${isPresent ? 'is-present' : ''}`;
         div.innerHTML = `
-          <div onclick="toggleAtt('${s.roll}')" style="cursor:pointer; flex:1; display:flex; align-items:center;">
+          <div onclick="toggleAtt('${s.roll}')" style="cursor:pointer; flex:1; display:flex; align-items:center; min-width:0;">
             <span class="roll-tag">#${s.roll}</span>
-            <span class="student-name">${s.name}</span>
+            <span class="student-name">${escapeHtml(s.name)}</span>
           </div>
-          <span class="status-badge ${isPresent ? 'present' : 'absent'}" onclick="toggleAtt('${s.roll}')">
-            ${isPresent ? 'PRESENT' : 'ABSENT'}
-          </span>
+          <div class="student-actions">
+            <span class="status-badge ${isPresent ? 'present' : 'absent'}" onclick="toggleAtt('${s.roll}')">
+              ${isPresent ? 'PRESENT' : 'ABSENT'}
+            </span>
+            <button class="btn-student-edit" onclick="editStudent('${s.id}', '${escapeJs(s.roll)}', '${escapeJs(s.name)}')">Edit</button>
+            <button class="btn-student-delete" onclick="deleteStudent('${s.id}', '${escapeJs(s.roll)}', '${escapeJs(s.name)}')">Delete</button>
+          </div>
         `;
         cont.appendChild(div);
       });
       updateStats();
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeJs(value) {
+      return String(value)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'");
+    }
+
+    // 4A. STUDENT ROSTER MANAGEMENT
+    async function addStudent() {
+      const roll = prompt("Enter student Roll Number:");
+      if (roll === null) return;
+
+      const cleanRoll = roll.trim();
+      if (!cleanRoll) {
+        alert("Roll Number cannot be empty.");
+        return;
+      }
+
+      const name = prompt("Enter student Name:");
+      if (name === null) return;
+
+      const cleanName = name.trim();
+      if (!cleanName) {
+        alert("Student Name cannot be empty.");
+        return;
+      }
+
+      if (students.some(s => String(s.roll).trim() === cleanRoll)) {
+        alert("A student with this Roll Number already exists.");
+        return;
+      }
+
+      try {
+        await db.collection("students").doc(cleanRoll).set({
+          roll: cleanRoll,
+          name: cleanName
+        });
+        alert(`Student added successfully.\n#${cleanRoll} ${cleanName}`);
+      } catch (e) {
+        alert("Add Student failed: " + e.message);
+      }
+    }
+
+    async function editStudent(docId, oldRoll, oldName) {
+      const newRollInput = prompt("Edit Roll Number:", oldRoll);
+      if (newRollInput === null) return;
+
+      const newRoll = newRollInput.trim();
+      if (!newRoll) {
+        alert("Roll Number cannot be empty.");
+        return;
+      }
+
+      const newNameInput = prompt("Edit Student Name:", oldName);
+      if (newNameInput === null) return;
+
+      const newName = newNameInput.trim();
+      if (!newName) {
+        alert("Student Name cannot be empty.");
+        return;
+      }
+
+      const duplicate = students.some(s =>
+        s.id !== docId && String(s.roll).trim() === newRoll
+      );
+
+      if (duplicate) {
+        alert("Another student already uses this Roll Number.");
+        return;
+      }
+
+      try {
+        if (newRoll === oldRoll) {
+          await db.collection("students").doc(docId).update({
+            roll: newRoll,
+            name: newName
+          });
+        } else {
+          // Roll number is also used as the Firestore document ID in this app.
+          // Move the student to the new document ID so future saves stay consistent.
+          const batch = db.batch();
+          const oldRef = db.collection("students").doc(docId);
+          const newRef = db.collection("students").doc(newRoll);
+
+          batch.set(newRef, { roll: newRoll, name: newName });
+          batch.delete(oldRef);
+          await batch.commit();
+
+          if (dailyAttendance[oldRoll] !== undefined) {
+            dailyAttendance[newRoll] = dailyAttendance[oldRoll];
+            delete dailyAttendance[oldRoll];
+          }
+        }
+
+        alert("Student updated successfully.");
+      } catch (e) {
+        alert("Edit Student failed: " + e.message);
+      }
+    }
+
+    async function deleteStudent(docId, roll, name) {
+      const confirmed = confirm(
+        `Delete student permanently?\n\n#${roll} ${name}\n\nThis removes the student from the current roster. Existing attendance history is not deleted.`
+      );
+
+      if (!confirmed) return;
+
+      try {
+        await db.collection("students").doc(docId).delete();
+        delete dailyAttendance[roll];
+        alert(`Student #${roll} deleted from roster.`);
+      } catch (e) {
+        alert("Delete Student failed: " + e.message);
+      }
     }
 
     function toggleAtt(r) { dailyAttendance[r] = !dailyAttendance[r]; renderList(); }
