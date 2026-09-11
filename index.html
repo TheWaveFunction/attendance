@@ -81,7 +81,6 @@
       border-color: var(--primary);
     }
 
-    /* Main UI */
     header {
       display: flex;
       justify-content: space-between;
@@ -160,6 +159,21 @@
       margin-bottom: 10px;
     }
 
+    .notice-bar {
+      font-size: 0.8rem;
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .notice-bar.existing {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      display: block;
+    }
+
     .btn {
       padding: 10px;
       border: none;
@@ -174,8 +188,8 @@
     .btn-save { background: #16a34a; color: white; width: 100%; padding: 12px; font-size: 0.95rem; margin-top: 10px; }
     .btn-pdf { background: #0284c7; color: white; width: 100%; margin-top: 8px; }
     .btn-danger { background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+    .btn-edit { background: #d97706; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; margin-right: 4px; }
 
-    /* Student List */
     .student-item {
       display: flex;
       align-items: center;
@@ -204,7 +218,6 @@
     .status-badge.present { background: #22c55e; color: #ffffff; }
     .status-badge.absent { background: #e2e8f0; color: #64748b; }
 
-    /* Report Table */
     .report-table {
       width: 100%;
       border-collapse: collapse;
@@ -223,7 +236,6 @@
       color: #334155;
     }
 
-    /* History Record Item */
     .history-card {
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -262,7 +274,7 @@
     <div class="tabs">
       <button class="tab-btn active" id="tabMarkBtn" onclick="switchTab('mark')">📝 Daily Register</button>
       <button class="tab-btn" id="tabReportBtn" onclick="switchTab('report')">📊 Final Report</button>
-      <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('history')">🗑️ Manage / Delete History</button>
+      <button class="tab-btn" id="tabHistoryBtn" onclick="switchTab('history')">🗄️ History & Edit</button>
     </div>
 
     <!-- VIEW 1: DAILY ATTENDANCE -->
@@ -271,11 +283,11 @@
         <div class="grid-2">
           <div>
             <label>Subject</label>
-            <input type="text" id="subject" value="Physics" />
+            <input type="text" id="subject" value="Physics" onchange="loadDateAttendanceIfExists()" />
           </div>
           <div>
             <label>Semester (1 to 8)</label>
-            <select id="semester">
+            <select id="semester" onchange="loadDateAttendanceIfExists()">
               <option value="Semester 1">Semester 1</option>
               <option value="Semester 2">Semester 2</option>
               <option value="Semester 3">Semester 3</option>
@@ -290,7 +302,7 @@
         <div class="grid-2" style="margin-top: 10px;">
           <div>
             <label>Date</label>
-            <input type="date" id="date" />
+            <input type="date" id="date" onchange="loadDateAttendanceIfExists()" />
           </div>
           <div>
             <label>Faculty</label>
@@ -300,6 +312,9 @@
       </div>
 
       <div class="card">
+        <!-- Live status indicator if old record is loaded -->
+        <div id="statusNotice" class="notice-bar"></div>
+
         <div class="stats">
           <span>Total: <span id="totalCount">0</span></span>
           <span style="color:var(--present);">Present: <span id="presentCount">0</span></span>
@@ -311,7 +326,7 @@
           <button class="btn btn-outline" onclick="markAllPresent()">✅ All Present</button>
         </div>
 
-        <button class="btn btn-save" onclick="saveToCloud()">💾 Store Attendance in Cloud</button>
+        <button id="saveBtn" class="btn btn-save" onclick="saveToCloud()">💾 Store Attendance in Cloud</button>
         <button class="btn btn-pdf" onclick="generateDailyPDF()">📥 Download 1-Page PDF</button>
       </div>
 
@@ -352,15 +367,15 @@
       </div>
     </div>
 
-    <!-- VIEW 3: DELETE CLOUD DATA (DIRECT VISIBLE) -->
+    <!-- VIEW 3: HISTORY & EDIT -->
     <div id="viewHistorySection" style="display: none;">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <div>
             <h3 style="font-size:1rem;">Stored Cloud Records</h3>
-            <p style="font-size:0.75rem; color:#64748b;">Delete wrong entries or old semester data.</p>
+            <p style="font-size:0.75rem; color:#64748b;">Directly edit any individual student's status.</p>
           </div>
-          <button class="btn-danger" onclick="wipeEntireSemester()">⚠️ Wipe Entire Semester</button>
+          <button class="btn-danger" onclick="wipeEntireSemester()">⚠️ Wipe Semester</button>
         </div>
 
         <div style="margin-bottom: 12px;">
@@ -425,13 +440,13 @@
     let students = [];
     let dailyAttendance = {};
 
-    // 2. PIN AUTH
     function verifyPin() {
       const pin = document.getElementById("pinInput").value;
       if (pin === "1234") {
         document.getElementById("lockScreen").style.display = "none";
         document.getElementById("mainPortal").style.display = "block";
         document.getElementById("date").valueAsDate = new Date();
+        loadDateAttendanceIfExists();
       } else {
         document.getElementById("pinError").style.display = "block";
       }
@@ -442,7 +457,6 @@
       document.getElementById("mainPortal").style.display = "none";
     }
 
-    // 3. TABS
     function switchTab(t) {
       document.getElementById("viewMarkSection").style.display = t === 'mark' ? 'block' : 'none';
       document.getElementById("viewReportSection").style.display = t === 'report' ? 'block' : 'none';
@@ -456,7 +470,6 @@
       if (t === 'report') loadCumulativeReport();
     }
 
-    // 4. SYNC STUDENTS
     async function initDb() {
       const snap = await db.collection("students").get();
       if (snap.empty) {
@@ -511,7 +524,44 @@
       document.getElementById("absentCount").innerText = total - present;
     }
 
-    // 5. SAVE TO FIRESTORE
+    // CHECK & LOAD SAVED ATTENDANCE IF ALREADY STORED FOR SELECTED DATE
+    async function loadDateAttendanceIfExists() {
+      const sub = document.getElementById("subject").value.trim() || "Physics";
+      const sem = document.getElementById("semester").value;
+      const dt = document.getElementById("date").value;
+      const notice = document.getElementById("statusNotice");
+      const saveBtn = document.getElementById("saveBtn");
+
+      if (!dt) return;
+
+      const docId = `${dt}_${sem.replace(/\s+/g, '_')}_${sub.replace(/\s+/g, '_')}`;
+
+      try {
+        const doc = await db.collection("attendance_history").doc(docId).get();
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.records && Array.isArray(data.records)) {
+            data.records.forEach(r => {
+              dailyAttendance[r.roll] = (r.status === "PRESENT");
+            });
+          }
+          renderList();
+          notice.className = "notice-bar existing";
+          notice.innerHTML = `⚠️ <b>Saved Cloud Record Loaded:</b> Aap <b>${dt}</b> ki attendance dekh rahe hain. Kisi bhi bache ka status badalkar "Update" dabayein.`;
+          saveBtn.innerText = "🔄 Update / Overwrite Attendance";
+          saveBtn.style.background = "#d97706";
+        } else {
+          notice.className = "notice-bar";
+          notice.style.display = "none";
+          saveBtn.innerText = "💾 Store Attendance in Cloud";
+          saveBtn.style.background = "#16a34a";
+        }
+      } catch (e) {
+        console.error("Check Error: ", e);
+      }
+    }
+
+    // SAVE / UPDATE TO FIRESTORE
     async function saveToCloud() {
       const sub = document.getElementById("subject").value.trim() || "Physics";
       const sem = document.getElementById("semester").value;
@@ -534,15 +584,17 @@
           faculty: fac,
           total: students.length,
           present: Object.values(dailyAttendance).filter(Boolean).length,
-          records: records
+          records: records,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert(`✅ Attendance successfully saved to Cloud!\nDate: ${dt}\nSubject: ${sub}`);
+        alert(`✅ Attendance updated successfully in Cloud!\nDate: ${dt}\nSubject: ${sub}`);
+        loadDateAttendanceIfExists();
       } catch (e) {
         alert("Save Error: " + e.message);
       }
     }
 
-    // 6. DELETE & MANAGE CLOUD DATA
+    // LOAD HISTORY SESSIONS
     async function loadSavedSessions() {
       const sem = document.getElementById("historySemFilter").value;
       const cont = document.getElementById("savedSessionsList");
@@ -564,9 +616,14 @@
                 <strong>📅 ${d.date}</strong> — <span>${d.subject}</span>
                 <div style="font-size:0.75rem; color:#64748b;">Present: ${d.present}/${d.total}</div>
               </div>
-              <button class="btn-danger" onclick="deleteCloudRecord('${doc.id}', '${d.date}')">
-                🗑️ Delete
-              </button>
+              <div>
+                <button class="btn-edit" onclick="editSessionDirect('${d.date}', '${d.semester}', '${d.subject}')">
+                  ✏️ Edit
+                </button>
+                <button class="btn-danger" onclick="deleteCloudRecord('${doc.id}', '${d.date}')">
+                  🗑️ Delete
+                </button>
+              </div>
             </div>
           `;
         });
@@ -576,7 +633,15 @@
       }
     }
 
-    // Delete single class
+    // EDIT SESSION: Switches to register and loads the exact class
+    function editSessionDirect(date, sem, sub) {
+      document.getElementById("semester").value = sem;
+      document.getElementById("subject").value = sub;
+      document.getElementById("date").value = date;
+      switchTab('mark');
+      loadDateAttendanceIfExists();
+    }
+
     async function deleteCloudRecord(docId, date) {
       if (confirm(`Kya aap ${date} ka record cloud database se permanently delete karna chahte hain?`)) {
         try {
@@ -589,7 +654,6 @@
       }
     }
 
-    // Wipe whole semester
     async function wipeEntireSemester() {
       const sem = document.getElementById("historySemFilter").value;
       const check = prompt(`Type "DELETE" to permanently wipe all attendance for ${sem}:`);
@@ -607,7 +671,7 @@
       }
     }
 
-    // 7. CUMULATIVE REPORT
+    // CUMULATIVE REPORT
     async function loadCumulativeReport() {
       const sub = document.getElementById("reportSub").value.trim().toLowerCase();
       const sem = document.getElementById("reportSem").value;
@@ -677,7 +741,7 @@
       }
     }
 
-    // 8. 1-PAGE PDF (NO S.NO)
+    // 1-PAGE PDF
     function generateDailyPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
