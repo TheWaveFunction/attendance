@@ -42,7 +42,7 @@
       margin: 0 auto;
     }
 
-    /* Lock Screen */
+    /* Lock Screen Modal */
     #lockScreen {
       position: fixed;
       inset: 0;
@@ -64,6 +64,17 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
 
+    .lock-box h2 {
+      font-size: 1.25rem;
+      margin-bottom: 6px;
+    }
+
+    .lock-box p {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+
     .pin-input {
       letter-spacing: 8px;
       font-size: 1.4rem;
@@ -73,7 +84,7 @@
       border: 2px solid var(--border);
       border-radius: 8px;
       width: 100%;
-      margin: 12px 0;
+      margin-bottom: 12px;
     }
 
     .pin-input:focus {
@@ -81,6 +92,18 @@
       border-color: var(--primary);
     }
 
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 14px;
+      text-decoration: underline;
+    }
+
+    /* Main UI */
     header {
       display: flex;
       justify-content: space-between;
@@ -90,6 +113,17 @@
 
     header h1 {
       font-size: 1.3rem;
+    }
+
+    .btn-lock {
+      background: #fee2e2;
+      color: var(--absent);
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
     }
 
     .card {
@@ -250,14 +284,25 @@
 </head>
 <body>
 
-  <!-- Security Screen -->
+  <!-- Security Screen with Forgot PIN / Reset Support -->
   <div id="lockScreen">
-    <div class="lock-box">
+    <div class="lock-box" id="loginBox">
       <h2>🔒 Faculty Authorization</h2>
-      <p style="font-size:0.82rem; color:#64748b;">Enter PIN (Default: 1234)</p>
+      <p>Enter 4-Digit Security PIN</p>
       <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" />
-      <button class="btn btn-primary" style="width:100%;" onclick="verifyPin()">Unlock Register</button>
+      <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="verifyPin()">Unlock Register</button>
       <p id="pinError" style="color:var(--absent); font-size:0.8rem; margin-top:8px; display:none;">Incorrect PIN!</p>
+      <button class="link-btn" onclick="showForgotBox()">Forgot PIN?</button>
+    </div>
+
+    <div class="lock-box" id="forgotBox" style="display: none;">
+      <h2>🔑 Reset PIN</h2>
+      <p>Security Question:<br><strong>"What is your College Secret Key?"</strong></p>
+      <input type="text" id="secAnswer" placeholder="Enter Secret Answer" style="margin-bottom:8px;" />
+      <input type="password" id="newPinInput" maxlength="4" placeholder="Set New 4-Digit PIN" style="margin-bottom:12px;" />
+      <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="resetPin()">Update & Unlock</button>
+      <p id="resetError" style="color:var(--absent); font-size:0.8rem; margin-top:8px; display:none;">Wrong secret answer!</p>
+      <button class="link-btn" onclick="showLoginBox()">Back to Login</button>
     </div>
   </div>
 
@@ -267,7 +312,7 @@
         <h1>Attendance Portal</h1>
         <p style="font-size:0.8rem; color:#16a34a;">● Live Firebase Connected</p>
       </div>
-      <button class="btn" style="background:#fee2e2; color:var(--absent);" onclick="lockPortal()">🔒 Lock</button>
+      <button class="btn-lock" onclick="lockPortal()">🔒 Lock</button>
     </header>
 
     <!-- Navigation Tabs -->
@@ -312,7 +357,7 @@
       </div>
 
       <div class="card">
-        <!-- Live status indicator if old record is loaded -->
+        <!-- Status indicator if old record is loaded -->
         <div id="statusNotice" class="notice-bar"></div>
 
         <div class="stats">
@@ -440,11 +485,21 @@
     let students = [];
     let dailyAttendance = {};
 
+    // 2. SECURITY (PIN: 1234, Secret: college123)
+    const DEFAULT_PIN = "1234";
+    const SECRET_KEY = "college123";
+
+    function getPin() {
+      return localStorage.getItem("portal_saved_pin") || DEFAULT_PIN;
+    }
+
     function verifyPin() {
       const pin = document.getElementById("pinInput").value;
-      if (pin === "1234") {
+      if (pin === getPin()) {
         document.getElementById("lockScreen").style.display = "none";
         document.getElementById("mainPortal").style.display = "block";
+        document.getElementById("pinError").style.display = "none";
+        document.getElementById("pinInput").value = "";
         document.getElementById("date").valueAsDate = new Date();
         loadDateAttendanceIfExists();
       } else {
@@ -455,8 +510,36 @@
     function lockPortal() {
       document.getElementById("lockScreen").style.display = "flex";
       document.getElementById("mainPortal").style.display = "none";
+      showLoginBox();
     }
 
+    function showForgotBox() {
+      document.getElementById("loginBox").style.display = "none";
+      document.getElementById("forgotBox").style.display = "block";
+    }
+
+    function showLoginBox() {
+      document.getElementById("forgotBox").style.display = "none";
+      document.getElementById("loginBox").style.display = "block";
+    }
+
+    function resetPin() {
+      const ans = document.getElementById("secAnswer").value.trim().toLowerCase();
+      const newPin = document.getElementById("newPinInput").value.trim();
+
+      if (ans === SECRET_KEY.toLowerCase() && newPin.length === 4) {
+        localStorage.setItem("portal_saved_pin", newPin);
+        alert("PIN Reset Successful!");
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("mainPortal").style.display = "block";
+        document.getElementById("date").valueAsDate = new Date();
+        loadDateAttendanceIfExists();
+      } else {
+        document.getElementById("resetError").style.display = "block";
+      }
+    }
+
+    // 3. TABS
     function switchTab(t) {
       document.getElementById("viewMarkSection").style.display = t === 'mark' ? 'block' : 'none';
       document.getElementById("viewReportSection").style.display = t === 'report' ? 'block' : 'none';
@@ -470,6 +553,7 @@
       if (t === 'report') loadCumulativeReport();
     }
 
+    // 4. SYNC STUDENTS
     async function initDb() {
       const snap = await db.collection("students").get();
       if (snap.empty) {
@@ -524,7 +608,7 @@
       document.getElementById("absentCount").innerText = total - present;
     }
 
-    // CHECK & LOAD SAVED ATTENDANCE IF ALREADY STORED FOR SELECTED DATE
+    // 5. CHECK & LOAD SAVED ATTENDANCE IF STORED FOR SELECTED DATE
     async function loadDateAttendanceIfExists() {
       const sub = document.getElementById("subject").value.trim() || "Physics";
       const sem = document.getElementById("semester").value;
@@ -547,7 +631,7 @@
           }
           renderList();
           notice.className = "notice-bar existing";
-          notice.innerHTML = `⚠️ <b>Saved Cloud Record Loaded:</b> Aap <b>${dt}</b> ki attendance dekh rahe hain. Kisi bhi bache ka status badalkar "Update" dabayein.`;
+          notice.innerHTML = `⚠️ <b>Saved Cloud Record Loaded:</b> Aap <b>${dt}</b> ki attendance dekh rahe hain. Status change karke "Update" dabayein.`;
           saveBtn.innerText = "🔄 Update / Overwrite Attendance";
           saveBtn.style.background = "#d97706";
         } else {
@@ -561,7 +645,7 @@
       }
     }
 
-    // SAVE / UPDATE TO FIRESTORE
+    // 6. SAVE / UPDATE TO FIRESTORE
     async function saveToCloud() {
       const sub = document.getElementById("subject").value.trim() || "Physics";
       const sem = document.getElementById("semester").value;
@@ -594,7 +678,7 @@
       }
     }
 
-    // LOAD HISTORY SESSIONS
+    // 7. LOAD HISTORY SESSIONS
     async function loadSavedSessions() {
       const sem = document.getElementById("historySemFilter").value;
       const cont = document.getElementById("savedSessionsList");
@@ -633,7 +717,6 @@
       }
     }
 
-    // EDIT SESSION: Switches to register and loads the exact class
     function editSessionDirect(date, sem, sub) {
       document.getElementById("semester").value = sem;
       document.getElementById("subject").value = sub;
@@ -656,8 +739,9 @@
 
     async function wipeEntireSemester() {
       const sem = document.getElementById("historySemFilter").value;
-      const check = prompt(`Type "DELETE" to permanently wipe all attendance for ${sem}:`);
-      if (check === "DELETE") {
+      const promptPin = prompt(`⚠️ WARNING: Yeh "${sem}" ka saara attendance data permanently delete karega!\n\nConfirm karne ke liye Security PIN daalein:`);
+      
+      if (promptPin === getPin()) {
         try {
           const snap = await db.collection("attendance_history").where("semester", "==", sem).get();
           const batch = db.batch();
@@ -668,10 +752,12 @@
         } catch (e) {
           alert("Wipe error: " + e.message);
         }
+      } else if (promptPin !== null) {
+        alert("❌ Galat PIN! Operation cancel ho gaya.");
       }
     }
 
-    // CUMULATIVE REPORT
+    // 8. CUMULATIVE REPORT
     async function loadCumulativeReport() {
       const sub = document.getElementById("reportSub").value.trim().toLowerCase();
       const sem = document.getElementById("reportSem").value;
@@ -741,7 +827,7 @@
       }
     }
 
-    // 1-PAGE PDF
+    // 9. 1-PAGE PDF
     function generateDailyPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
