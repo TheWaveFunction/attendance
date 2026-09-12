@@ -958,6 +958,8 @@
         const isPresent = !!dailyAttendance[s.roll];
         const div = document.createElement("div");
         div.className = `student-item ${isPresent ? 'is-present' : ''}`;
+        
+        // Replaced 'Edit' with '✎' and 'Delete' with '✖'
         div.innerHTML = `
           <div onclick="toggleAtt('${s.roll}')" style="cursor:pointer; flex:1; display:flex; align-items:center; min-width:0;">
             <span class="roll-tag">#${s.roll}</span>
@@ -967,8 +969,8 @@
             <span class="status-badge ${isPresent ? 'present' : 'absent'}" onclick="toggleAtt('${s.roll}')">
               ${isPresent ? 'PRESENT' : 'ABSENT'}
             </span>
-            <button class="btn-student-edit" onclick="editStudent('${s.id}', '${escapeJs(s.roll)}', '${escapeJs(s.name)}')">Edit</button>
-            <button class="btn-student-delete" onclick="deleteStudent('${s.id}', '${escapeJs(s.roll)}', '${escapeJs(s.name)}')">Delete</button>
+            <button class="btn-student-edit" onclick="editStudent('${s.id}', '${escapeJs(s.roll)}', '${escapeJs(s.name)}')">✎</button>
+            <button class="btn-student-delete" onclick="deleteStudent('${s.id}', '${escapeJs(s.roll)}', '${escapeJs(s.name)}')">✖</button>
           </div>
         `;
         cont.appendChild(div);
