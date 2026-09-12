@@ -1331,7 +1331,7 @@
       }
     }
 
-    // 9. 1-PAGE PDF
+    // 9. 1-PAGE PDF (Modified for Present Only + Absent Count)
     function generateDailyPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
@@ -1349,10 +1349,17 @@
       doc.setTextColor(100, 116, 139);
       doc.text(`Subject: ${sub}   |   ${sem}   |   Date: ${dt}   |   Faculty: Dr. Kanai Barik`, 14, 21);
 
-      const tableData = students.map(s => [
+      // Sirf present students ko filter karna
+      const presentStudents = students.filter(s => dailyAttendance[s.roll]);
+      
+      // Total absent count nikalna
+      const totalAbsentCount = students.length - presentStudents.length;
+
+      // Table ke liye data prepare karna
+      const tableData = presentStudents.map(s => [
         s.roll,
         s.name,
-        dailyAttendance[s.roll] ? "PRESENT" : "ABSENT"
+        "PRESENT"
       ]);
 
       doc.autoTable({
@@ -1367,6 +1374,13 @@
           2: { cellWidth: 30 }
         }
       });
+
+      // Table khatam hone ke baad last mein absent count add karna
+      const finalY = doc.lastAutoTable.finalY || 26; 
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(225, 29, 72); // Red color for highlight
+      doc.text(`Total Absent Students: ${totalAbsentCount}`, 14, finalY + 10);
 
       doc.save(`Attendance_${sem}_${dt}.pdf`);
     }
